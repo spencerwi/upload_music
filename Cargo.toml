@@ -11,3 +11,9 @@ warp = "0.3"
 uuid = { version = "0.8", features = ["v4"] }
 futures = { version = "0.3", default-features = false }
 bytes = "1.0"
+
+# for dealing with zip-file uploads
+zip = "0.6.2"
+zip-extensions = "0.6.1"
+mime = "0.3.16"
+tree_magic = "0.2.3"
