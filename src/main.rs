@@ -1,9 +1,5 @@
 #![deny(warnings)]
 
-extern crate tree_magic;
-
-use std::fs::File;
-
 use bytes::BufMut;
 use futures::TryStreamExt;
 use warp::hyper::StatusCode;
@@ -14,6 +10,8 @@ use warp::Reply;
 use warp::Rejection;
 use warp::multipart::FormData;
 use warp::Filter;
+
+mod ziputils;
 
 #[tokio::main]
 async fn main() {
@@ -78,8 +76,7 @@ async fn upload(form: FormData) -> Result<impl Reply, Rejection> {
                 warp::reject::reject()
             })?;
 
-        let uploaded_file_mimetype = tree_magic::from_u8(&value);
-        if uploaded_file_mimetype != "application/zip" {
+        if !(ziputils::is_zipfile(&value)) {
             eprintln!("Non-zipfile upload detected");
             return Err(warp::reject::reject());
         }
@@ -105,29 +102,11 @@ async fn upload(form: FormData) -> Result<impl Reply, Rejection> {
 
         println!("Uploaded zip file: {}", file_name.to_string_lossy());
         println!("Unpacking zip file {} now", file_name.to_string_lossy());
-        let file = File::open(&file_name).unwrap();
-        let archive = zip::ZipArchive::new(file);
-        match archive {
-            Ok(_) => {}
-            Err(e) => {
-                eprintln!("Something is wrong with the uploaded zip file: {}", e);
-                return Err(warp::reject::reject());
-            }
-        }
-        // TOOD: we should validate the contents of the zip file!
         let target_dir = base_upload_dir.join(format!("extracted-{}", file_uuid));
-        match tokio::fs::create_dir_all(&target_dir).await {
+        match ziputils::unpack_zipfile(&file_name, &target_dir).await {
             Ok(_) => {},
             Err(e) => {
-                eprintln!("failed to create extract dir {}: {}", target_dir.to_string_lossy(), e);
-                return Err(warp::reject::reject());
-            }
-        };
-
-        match archive.unwrap().extract(&target_dir) {
-            Ok(_) => {},
-            Err(e) => {
-                eprintln!("failed to extract {}: {}", file_name.to_string_lossy(), e);
+                eprintln!("Something went wrong extracting the zipfile: {}", e);
                 return Err(warp::reject::reject());
             }
         }
