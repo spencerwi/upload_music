@@ -2,6 +2,10 @@ use serde::Deserialize;
 use std::fs;
 use crate::errors::AppError;
 
+use etcetera::app_strategy;
+use etcetera::app_strategy::AppStrategy;
+use etcetera::app_strategy::AppStrategyArgs;
+
 #[derive(Deserialize)]
 pub struct OutputConfig {
     pub upload_dir: String,
@@ -18,7 +22,20 @@ pub struct Config {
 }
 
 pub fn load_config() -> Result<Config, AppError> {
-    match fs::read_to_string("upload_music.toml") {
+    let config_location_strategy = app_strategy::choose_app_strategy(AppStrategyArgs {
+        top_level_domain: "com.spencerwi".to_string(), 
+        author: "spencerwi".to_string(), 
+        app_name: "upload_music".to_string()
+    }).unwrap();
+
+    let config_file_path = config_location_strategy.config_dir().join("upload_music.toml");
+    if !config_file_path.exists() {
+        return Err(AppError::InvalidConfig { 
+            cause: format!("File does not exist at {}", config_file_path.to_path_buf().to_string_lossy()) 
+        });
+    }
+
+    match fs::read_to_string(config_file_path) {
         Ok(config_file_contents) => {
             match toml::from_str(&config_file_contents) {
                 Ok(config_struct) => {
