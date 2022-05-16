@@ -14,13 +14,19 @@ use warp::Filter;
 
 mod ziputils;
 mod appconfig;
+mod errors;
 
 #[tokio::main]
 async fn main() {
     let config = appconfig::load_config();
+    if config.is_err() {
+        eprintln!("{}", config.err().unwrap());
+        std::process::exit(1);
+    }
+    let config = config.unwrap();
 
-    let port = config.port.unwrap_or(5551);
-    let interface = config.interface.unwrap_or("127.0.0.1".to_string());
+    let port = config.port;
+    let interface = config.interface;
     let address = format!("{}:{}", interface, port);
     let socket_addr = match address.parse::<SocketAddr>() {
         Ok(a) => a,

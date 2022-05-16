@@ -2,7 +2,7 @@
 
 # (OPTIONAL) what port the server should listen on; defaults to 5551
 port = 5551
-# (OPTIONAL) what network address interface it should listen on; defaults to 127.0.0.1
+# (OPTIONAL) what network address interface it should listen on; defaults to "127.0.0.1"
 interface = "127.0.0.1"
 
 [output]
