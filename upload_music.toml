@@ -1,0 +1,18 @@
+# Example config file, to demonstrate possible configuration values and their defaults
+
+# (OPTIONAL) what port the server should listen on; defaults to 5551
+port = 5551
+# (OPTIONAL) what network address interface it should listen on; defaults to 127.0.0.1
+interface = "127.0.0.1"
+
+[output]
+# (REQUIRED) The base output directory where music files should be uploaded
+upload_dir = "/tmp/music_upload/files"
+# (REQUIRED) The pattern to use when uploading files. The file extension is implied; you don't need to specify it here.
+# You can specify directory structures, and the directory will be created if it doesn't already exist.
+# Available pattern variables:
+#  - {{ARTIST}}
+#  - {{ALBUM}}
+#  - {{TITLE}} 
+#  - {{TRACKNUMBER}}
+filename_pattern = "{{ARTIST}}/{{ALBUM}}/{{TITLE}}"

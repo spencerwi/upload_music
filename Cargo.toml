@@ -17,3 +17,7 @@ zip = "0.6.2"
 zip-extensions = "0.6.1"
 mime = "0.3.16"
 tree_magic = "0.2.3"
+
+# for allowing user configuration
+toml = "0.5.9"
+serde = { version = "1.0", features = ["derive"] }

@@ -5,6 +5,7 @@ use futures::TryStreamExt;
 use warp::hyper::StatusCode;
 use warp::multipart::Part;
 use std::convert::Infallible;
+use std::net::SocketAddr;
 use uuid::Uuid;
 use warp::Reply;
 use warp::Rejection;
@@ -12,10 +13,19 @@ use warp::multipart::FormData;
 use warp::Filter;
 
 mod ziputils;
+mod appconfig;
 
 #[tokio::main]
 async fn main() {
-    let port = 5551;
+    let config = appconfig::load_config();
+
+    let port = config.port.unwrap_or(5551);
+    let interface = config.interface.unwrap_or("127.0.0.1".to_string());
+    let address = format!("{}:{}", interface, port);
+    let socket_addr = match address.parse::<SocketAddr>() {
+        Ok(a) => a,
+        Err(_) => { panic!("Invalid inteface/port format, check your config file: {}", address); }
+    };
 
     let index = warp::get()
         .and(warp::path::end())
@@ -27,8 +37,8 @@ async fn main() {
         .and_then(upload);
 
     let routes = index.or(upload_route).recover(handle_rejection);
-    println!("Server started at localhost:{}", port);
-    warp::serve(routes).run(([0, 0, 0, 0], port)).await;
+    println!("Server started at {}", address);
+    warp::serve(routes).run(socket_addr).await;
 }
 
 async fn upload(form: FormData) -> Result<impl Reply, Rejection> {
