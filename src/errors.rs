@@ -1,6 +1,12 @@
-extern crate custom_error;
-use custom_error::custom_error;
+use thiserror::Error;
 
-custom_error!{pub AppError
-    InvalidConfig{cause:String} = "Invalid configuration: {cause}"
+#[derive(Error, Debug)]
+pub enum AppError {
+    #[error("Invalid configuration: {cause}")]
+    InvalidConfig { cause: String },
+    #[error("Cannot read audio file metadata from {file_path}: {cause}")]
+    CannotReadAudioMetadata {
+        file_path:String, 
+        cause:String
+    }
 }

@@ -24,4 +24,7 @@ serde = { version = "1.0", features = ["derive"] }
 etcetera = "0.4"
 
 # error-handling
-custom_error = "1.9.2"
+thiserror = "1.0"
+
+# for reading audio-file metadata
+lofty = "0.6"
