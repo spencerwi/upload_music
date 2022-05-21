@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate lazy_static;
+
 use bytes::BufMut;
 use futures::TryStreamExt;
 use warp::hyper::StatusCode;
@@ -18,15 +21,10 @@ mod ziputils;
 
 #[tokio::main]
 async fn main() {
-    let config = appconfig::load_config();
-    if config.is_err() {
-        eprintln!("{}", config.err().unwrap());
-        std::process::exit(1);
-    }
-    let config = config.unwrap();
+    let config = &appconfig::CONFIG;
 
     let port = config.port;
-    let interface = config.interface;
+    let interface = &config.interface;
     let address = format!("{}:{}", interface, port);
     let socket_addr = match address.parse::<SocketAddr>() {
         Ok(a) => a,
@@ -119,7 +117,7 @@ async fn upload(form: FormData) -> Result<impl Reply, Rejection> {
         println!("Uploaded zip file: {}", file_name.to_string_lossy());
         println!("Unpacking zip file {} now", file_name.to_string_lossy());
         let target_dir = base_upload_dir.join(format!("extracted-{}", file_uuid));
-        match ziputils::unpack_zipfile(&file_name, &target_dir).await {
+        match ziputils::unpack_zipfile(&file_name, &target_dir, &appconfig::CONFIG.output.filename_pattern).await {
             Ok(_) => {},
             Err(e) => {
                 eprintln!("Something went wrong extracting the zipfile: {}", e);

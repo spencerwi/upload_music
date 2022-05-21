@@ -21,6 +21,15 @@ pub struct Config {
     pub output: OutputConfig,
 }
 
+lazy_static! {
+    pub static ref CONFIG: Config = {
+        match load_config() {
+            Ok(c) => c,
+            Err(e) => panic!("Unable to read config: {}", e)
+        }
+    };
+}
+
 pub fn load_config() -> Result<Config, AppError> {
     let config_location_strategy = app_strategy::choose_app_strategy(AppStrategyArgs {
         top_level_domain: "com.spencerwi".to_string(), 

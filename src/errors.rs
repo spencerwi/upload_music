@@ -4,9 +4,8 @@ use thiserror::Error;
 pub enum AppError {
     #[error("Invalid configuration: {cause}")]
     InvalidConfig { cause: String },
-    #[error("Cannot read audio file metadata from {file_path}: {cause}")]
+    #[error("Cannot read audio file metadata from given file: {cause}")]
     CannotReadAudioMetadata {
-        file_path:String, 
         cause:String
     }
 }

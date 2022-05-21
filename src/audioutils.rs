@@ -1,6 +1,7 @@
-use lofty::read_from;
+extern crate tree_magic;
+
+use lofty::Probe;
 use lofty::Accessor;
-use std::{fs::File, path::PathBuf};
 
 use crate::errors::AppError;
 
@@ -11,22 +12,27 @@ pub struct TrackMetadata {
     pub tracknumber: Option<i32>
 }
 
-pub fn extract_metadata(path: &PathBuf) -> Result<TrackMetadata, AppError> {
-    File::open(path)
+pub fn is_supported_audiofile(contents : &Vec<u8>) -> bool {
+    match tree_magic::from_u8(&contents).as_str() {
+        "audio/x-aiff" => true,
+        "audio/x-ape" => true,
+        "audio/flac" => true,
+        "audio/mpeg" => true, // mp3 or mp4 audio
+        "audio/mp3" => true,
+        "audio/ogg" => true,
+        "audio/opus" => true,
+        "audio/speex" => true,
+        "audio/wav" => true,
+        "audio/wave" => true,
+        "audio/x-wav" => true,
+        "audio/x-pn-wav" => true,
+        _ => false
+    }
+}
+
+pub fn extract_metadata<R: std::io::Read + std::io::Seek>(source: &mut R) -> Result<TrackMetadata, AppError> {
+    return Probe::new(source).read(true)
         .map_err(|e| AppError::CannotReadAudioMetadata { 
-            file_path: path.to_string_lossy().to_string(),
-            cause: format!("{:?}", e)
-        })
-        // TODO: I need to be able to map Result<T,E1> to Result<U,E2>
-        .and_then(|mut file| match read_from(&mut file, false) {
-            Ok(tags) => Ok(tags),
-            Err(e) => Err(AppError::CannotReadAudioMetadata { 
-                file_path: path.to_string_lossy().to_string(),
-                cause: format!("{:?}", e)
-            })
-        })
-        .map_err(|e| AppError::CannotReadAudioMetadata { 
-            file_path: path.to_string_lossy().to_string(),
             cause: format!("{:?}", e)
         })
         .map(|tagged_file| {
@@ -38,7 +44,7 @@ pub fn extract_metadata(path: &PathBuf) -> Result<TrackMetadata, AppError> {
                         artist: my_tag.artist().map(|s| s.to_owned()),
                         title: my_tag.title().map(|s| s.to_owned()),
                         album: my_tag.album().map(|s| s.to_owned()),
-                        tracknumber: None
+                        tracknumber: None // TODO: how to read track number?
                     }
                 }
             }
