@@ -9,4 +9,5 @@
 [X] Build the piece that uses audio file metadata and the pattern from the config file to determine output file structure  
 [X] Change the zip-file extraction so that it iterates over all files, grabs audio files only, and runs them through the file-renamer engine to determine where to extract them.
 [ ] Figure out the best way to extract track number, since that's not always present
+[ ] DECENT RESPONSE MESSAGES
 [ ] More tests!
