@@ -2,7 +2,6 @@ extern crate tree_magic;
 
 use std::{fs::File, path::PathBuf};
 
-
 pub fn is_zipfile(contents : &Vec<u8>) -> bool {
     let mimetype = tree_magic::from_u8(&contents);
     return mimetype == "application/zip";

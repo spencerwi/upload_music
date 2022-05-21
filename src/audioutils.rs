@@ -4,14 +4,14 @@ use std::{fs::File, path::PathBuf};
 
 use crate::errors::AppError;
 
-pub struct TrackProperties {
-    artist: Option<String>,
-    title: Option<String>,
-    album: Option<String>,
-    tracknumber: Option<i32>
+pub struct TrackMetadata {
+    pub artist: Option<String>,
+    pub title: Option<String>,
+    pub album: Option<String>,
+    pub tracknumber: Option<i32>
 }
 
-pub fn extract_metadata(path: &PathBuf) -> Result<TrackProperties, AppError> {
+pub fn extract_metadata(path: &PathBuf) -> Result<TrackMetadata, AppError> {
     File::open(path)
         .map_err(|e| AppError::CannotReadAudioMetadata { 
             file_path: path.to_string_lossy().to_string(),
@@ -34,7 +34,7 @@ pub fn extract_metadata(path: &PathBuf) -> Result<TrackProperties, AppError> {
                 None => empty_track_data(),
                 Some(t) => {
                     let my_tag = t.clone();
-                    return TrackProperties {
+                    return TrackMetadata {
                         artist: my_tag.artist().map(|s| s.to_owned()),
                         title: my_tag.title().map(|s| s.to_owned()),
                         album: my_tag.album().map(|s| s.to_owned()),
@@ -45,8 +45,8 @@ pub fn extract_metadata(path: &PathBuf) -> Result<TrackProperties, AppError> {
         })
 }
 
-fn empty_track_data() -> TrackProperties {
-    return TrackProperties { 
+fn empty_track_data() -> TrackMetadata {
+    return TrackMetadata { 
         artist: None, 
         title: None, 
         album: None, 

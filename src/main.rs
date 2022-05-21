@@ -1,5 +1,3 @@
-#![deny(warnings)]
-
 use bytes::BufMut;
 use futures::TryStreamExt;
 use warp::hyper::StatusCode;
@@ -15,6 +13,7 @@ use warp::Filter;
 mod appconfig;
 mod audioutils;
 mod errors;
+mod file_namer;
 mod ziputils;
 
 #[tokio::main]
